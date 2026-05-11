@@ -35,7 +35,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res.status(response.status).json(data);
     }
 
-    const categories = Array.isArray(data) ? data.map((c: any) => ({ id: c.id, name: c.name, count: c.count })) : [];
+    const categories = Array.isArray(data) ? data.map((c: any) => ({ id: c.id, name: c.name, count: c.count, parent: c.parent || 0 })) : [];
     return res.status(200).json(categories);
   } catch (error) {
     console.error('Error en categories:', error);

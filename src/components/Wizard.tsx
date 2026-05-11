@@ -250,35 +250,84 @@ export const Wizard = () => {
       {step === 'SELECTING_CATEGORIES' && (
         <div className="p-10 bg-white rounded-3xl shadow-2xl border border-gray-100">
           <h2 className="text-3xl font-serif mb-2 text-gray-900">Seleccionar Categorías</h2>
-          <p className="text-gray-400 mb-8">Elegí las secciones que querés incluir en el PDF.</p>
+          <div className="flex justify-between items-end mb-6">
+            <p className="text-gray-400">Elegí las secciones que querés incluir en el PDF.</p>
+            <button 
+              onClick={() => {
+                if (selectedCats.length === categories.length) {
+                  setSelectedCats([]);
+                } else {
+                  setSelectedCats(categories.map(c => c.id));
+                }
+              }}
+              className="text-xs font-bold text-black uppercase tracking-wider hover:underline"
+            >
+              {selectedCats.length === categories.length ? 'Deseleccionar todas' : 'Seleccionar todas'}
+            </button>
+          </div>
           
-          <div className="grid grid-cols-1 gap-3 max-h-96 overflow-y-auto pr-2 custom-scrollbar">
-            {categories.map(cat => (
-              <label 
-                key={cat.id}
-                className={`flex items-center justify-between p-4 rounded-2xl cursor-pointer transition-all border-2 ${
-                  isSelected(cat.id) ? 'border-black bg-black/5' : 'border-gray-50 bg-gray-50 hover:border-gray-200'
-                }`}
-              >
-                <div className="flex items-center gap-4">
-                  <input 
-                    type="checkbox"
-                    className="hidden"
-                    checked={isSelected(cat.id)}
-                    onChange={() => toggleCategory(cat.id)}
-                  />
-                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
-                    isSelected(cat.id) ? 'bg-black border-black' : 'border-gray-300'
-                  }`}>
-                    {isSelected(cat.id) && <div className="w-2 h-2 bg-white rounded-full" />}
-                  </div>
-                  <span className="font-medium text-gray-800">{cat.name}</span>
+          <div className="grid grid-cols-1 gap-6 max-h-96 overflow-y-auto pr-2 custom-scrollbar">
+            {categories.filter(c => !c.parent || c.parent === 0).map(parent => {
+              const children = categories.filter(c => c.parent === parent.id);
+              return (
+                <div key={parent.id} className="border-2 border-gray-100 rounded-2xl overflow-hidden bg-white">
+                  <label 
+                    className={`flex items-center justify-between p-4 cursor-pointer transition-all ${
+                      isSelected(parent.id) ? 'bg-black/5' : 'hover:bg-gray-50'
+                    }`}
+                  >
+                    <div className="flex items-center gap-4">
+                      <input 
+                        type="checkbox"
+                        className="hidden"
+                        checked={isSelected(parent.id)}
+                        onChange={() => toggleCategory(parent.id)}
+                      />
+                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                        isSelected(parent.id) ? 'bg-black border-black' : 'border-gray-300'
+                      }`}>
+                        {isSelected(parent.id) && <div className="w-2 h-2 bg-white rounded-full" />}
+                      </div>
+                      <span className="font-bold text-gray-900">{parent.name}</span>
+                    </div>
+                    <span className="text-xs font-bold text-gray-400 bg-white px-3 py-1 rounded-full shadow-sm border border-gray-100">
+                      {parent.count} items
+                    </span>
+                  </label>
+                  
+                  {children.length > 0 && (
+                    <div className="border-t border-gray-100 bg-gray-50/50 p-2 pl-12 flex flex-col gap-1">
+                      {children.map(child => (
+                        <label 
+                          key={child.id}
+                          className={`flex items-center justify-between p-3 rounded-xl cursor-pointer transition-all ${
+                            isSelected(child.id) ? 'bg-black/5 border-black/10 border' : 'hover:bg-gray-100 border-transparent border'
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <input 
+                              type="checkbox"
+                              className="hidden"
+                              checked={isSelected(child.id)}
+                              onChange={() => toggleCategory(child.id)}
+                            />
+                            <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all ${
+                              isSelected(child.id) ? 'bg-black border-black' : 'border-gray-300'
+                            }`}>
+                              {isSelected(child.id) && <div className="w-1.5 h-1.5 bg-white rounded-full" />}
+                            </div>
+                            <span className="font-medium text-sm text-gray-700">{child.name}</span>
+                          </div>
+                          <span className="text-[10px] font-bold text-gray-400 bg-white px-2 py-0.5 rounded-full shadow-sm border border-gray-100">
+                            {child.count} items
+                          </span>
+                        </label>
+                      ))}
+                    </div>
+                  )}
                 </div>
-                <span className="text-xs font-bold text-gray-400 bg-white px-3 py-1 rounded-full shadow-sm">
-                  {cat.count} items
-                </span>
-              </label>
-            ))}
+              );
+            })}
           </div>
 
           <div className="mt-10 flex gap-4">
