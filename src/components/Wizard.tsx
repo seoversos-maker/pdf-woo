@@ -94,6 +94,10 @@ export const Wizard = () => {
   }, []);
 
   const handleGenerate = async () => {
+    if (selectedCats.length === 0) {
+      setError('Seleccioná al menos una categoría.');
+      return;
+    }
     setLoading(true);
     try {
       let res = await fetch(`/api/products?category=${selectedCats.join(',')}`);
@@ -122,10 +126,19 @@ export const Wizard = () => {
     }
   };
 
-  const toggleCategory = (id: number) => {
-    setSelectedCats(prev => 
-      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
-    );
+  const toggleCategory = (id: any) => {
+    setSelectedCats(prev => {
+      const exists = prev.some(i => String(i) === String(id));
+      if (exists) {
+        return prev.filter(i => String(i) !== String(id));
+      } else {
+        return [...prev, id];
+      }
+    });
+  };
+
+  const isSelected = (id: any) => {
+    return selectedCats.some(i => String(i) === String(id));
   };
 
   return (
@@ -244,20 +257,20 @@ export const Wizard = () => {
               <label 
                 key={cat.id}
                 className={`flex items-center justify-between p-4 rounded-2xl cursor-pointer transition-all border-2 ${
-                  selectedCats.includes(cat.id) ? 'border-black bg-black/5' : 'border-gray-50 bg-gray-50 hover:border-gray-200'
+                  isSelected(cat.id) ? 'border-black bg-black/5' : 'border-gray-50 bg-gray-50 hover:border-gray-200'
                 }`}
               >
                 <div className="flex items-center gap-4">
                   <input 
                     type="checkbox"
                     className="hidden"
-                    checked={selectedCats.includes(cat.id)}
+                    checked={isSelected(cat.id)}
                     onChange={() => toggleCategory(cat.id)}
                   />
                   <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
-                    selectedCats.includes(cat.id) ? 'bg-black border-black' : 'border-gray-300'
+                    isSelected(cat.id) ? 'bg-black border-black' : 'border-gray-300'
                   }`}>
-                    {selectedCats.includes(cat.id) && <div className="w-2 h-2 bg-white rounded-full" />}
+                    {isSelected(cat.id) && <div className="w-2 h-2 bg-white rounded-full" />}
                   </div>
                   <span className="font-medium text-gray-800">{cat.name}</span>
                 </div>
