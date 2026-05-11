@@ -1,0 +1,41 @@
+schema: spec-driven
+
+context: |
+  Tech stack: React (Vite), TypeScript, Tailwind CSS v4.
+  Architecture: Component-based, editorial grid layout prototype in src/App.tsx.
+  Testing: None detected.
+  Style: ESLint, Prettier (via Tailwind conventions).
+
+strict_tdd: false
+
+testing:
+  runner: null
+  layers:
+    unit: false
+    integration: false
+    e2e: false
+  coverage: false
+  quality_tools:
+    linter: "tsc --noEmit"
+    type_checker: "typescript"
+    formatter: "prettier"
+
+rules:
+  proposal:
+    - Include layout mockups for cyclical designs
+    - Identify image optimization strategy for PDFs
+  specs:
+    - Use Given/When/Then format for scenarios
+    - Define layout indices (0, 1, 2) clearly
+  design:
+    - Document Flexbox mapping for grid layouts in @react-pdf
+    - Specify font registration details
+  tasks:
+    - Group by: Infrastructure (PDF), Data (WooCommerce), UI (Layouts)
+    - Use hierarchical numbering (1.1, 1.2, etc.)
+  apply:
+    - Follow existing editorial design patterns
+    - Ensure accessibility in PDF tags
+  verify:
+    - Manual visual check against prototype screenshot
+    - Verify image resolution and file size

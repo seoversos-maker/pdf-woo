@@ -1,0 +1,36 @@
+@import url('https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,700&family=Hanken+Grotesk:wght@400;600&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-surface: #fbf9f9;
+  --color-on-surface: #1b1c1c;
+  --color-primary: #0e0f0f;
+  --color-on-surface-variant: #444748;
+  --color-surface-container-low: #f5f3f3;
+  --color-outline: #747878;
+
+  --font-display-lg: "Bodoni Moda", ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  --font-headline-md: "Bodoni Moda", ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  --font-label-caps: "Hanken Grotesk", ui-sans-serif, system-ui, sans-serif;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #e5e7eb;
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #d1d5db;
+}
+
+body {
+  background-color: #e3e2e2;
+}
