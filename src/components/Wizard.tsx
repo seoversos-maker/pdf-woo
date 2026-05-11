@@ -6,7 +6,7 @@ type Step = 'IDLE' | 'CONNECTING' | 'SELECTING_CATEGORIES' | 'GENERATING' | 'REA
 
 export const Wizard = () => {
   const [step, setStep] = useState<Step>('IDLE');
-  const [creds, setCreds] = useState({ url: '', key: '', secret: '' });
+  const [creds, setCreds] = useState({ url: '', key: '', secret: '', token: '' });
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCats, setSelectedCats] = useState<number[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
@@ -17,7 +17,8 @@ export const Wizard = () => {
   useEffect(() => {
     const saved = localStorage.getItem('wc_creds');
     if (saved) {
-      setCreds(JSON.parse(saved));
+      const parsed = JSON.parse(saved);
+      setCreds({ url: parsed.url || '', key: parsed.key || '', secret: parsed.secret || '', token: parsed.token || '' });
     }
   }, []);
 
@@ -36,10 +37,12 @@ export const Wizard = () => {
       if (!res.ok) throw new Error('Credenciales inválidas');
       
       const catRes = await fetch('/api/categories');
-      if (!catRes.ok) throw new Error('No se pudieron obtener categorías');
+      if (!catRes.ok) throw new Error('No se pudieron obtener categorías. Verificá tu Bridge Token.');
       const cats = await catRes.json();
       setCategories(cats);
       setStep('SELECTING_CATEGORIES');
+      // Save to localStorage
+      localStorage.setItem('wc_creds', JSON.stringify(creds));
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -126,6 +129,25 @@ export const Wizard = () => {
             </div>
             {isManual && (
               <>
+                <div className="bg-black/5 p-4 rounded-2xl border border-black/10 mb-4">
+                  <label className="block text-[10px] uppercase tracking-[0.2em] text-black/40 mb-3 font-bold">Modo Robusto (Bridge Plugin)</label>
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1 font-semibold">Bridge Token</label>
+                    <input 
+                      type="text" 
+                      placeholder="Pegá el token del plugin aquí..."
+                      className="w-full p-4 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-black transition-all text-sm"
+                      value={creds.token}
+                      onChange={e => setCreds({...creds, token: e.target.value})}
+                    />
+                  </div>
+                </div>
+
+                <div className="relative py-4">
+                  <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-gray-100"></span></div>
+                  <div className="relative flex justify-center text-xs uppercase"><span className="bg-white px-2 text-gray-400 font-bold">O usar API Nativa</span></div>
+                </div>
+
                 <div>
                   <label className="block text-xs uppercase tracking-widest text-gray-400 mb-2 font-semibold">Consumer Key</label>
                   <input 

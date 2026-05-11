@@ -3,8 +3,9 @@ import { cookies } from 'next/headers';
 
 export interface SessionData {
   url: string;
-  key: string;
-  secret: string;
+  key?: string;
+  secret?: string;
+  token?: string;
 }
 
 export const sessionOptions = {

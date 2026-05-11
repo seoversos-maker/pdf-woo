@@ -6,18 +6,27 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const categoryIds = searchParams.get('category');
 
-  if (!session.url || !session.key || !session.secret) {
+  if (!session.url || (!session.token && (!session.key || !session.secret))) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
   }
 
-  const auth = btoa(`${session.key}:${session.secret}`);
   let endpoint = `${session.url}/wp-json/wc/v3/products?per_page=100&status=publish`;
-  if (categoryIds) endpoint += `&category=${categoryIds}`;
+  const headers: Record<string, string> = {};
+
+  if (session.token) {
+    endpoint = `${session.url}/wp-json/pdf-woo/v1/products`;
+    headers['X-PDF-Woo-Token'] = session.token;
+  } else {
+    const auth = btoa(`${session.key}:${session.secret}`);
+    headers['Authorization'] = `Basic ${auth}`;
+  }
+
+  if (categoryIds) {
+    endpoint += (endpoint.includes('?') ? '&' : '?') + `category=${categoryIds}`;
+  }
 
   try {
-    const response = await fetch(endpoint, {
-      headers: { Authorization: `Basic ${auth}` },
-    });
+    const response = await fetch(endpoint, { headers });
     const data = await response.json();
     return NextResponse.json(data.map((item: any) => ({
       id: item.id,

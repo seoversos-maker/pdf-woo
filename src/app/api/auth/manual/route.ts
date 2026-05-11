@@ -3,16 +3,17 @@ import { getSession } from '@/lib/session';
 
 export async function POST(req: NextRequest) {
   try {
-    const { url, key, secret } = await req.json();
+    const { url, key, secret, token } = await req.json();
 
-    if (!url || !key || !secret) {
+    if (!url || (!token && (!key || !secret))) {
       return NextResponse.json({ error: 'Faltan datos' }, { status: 400 });
     }
 
     const session = await getSession();
     session.url = url;
-    session.key = key;
-    session.secret = secret;
+    session.key = key || '';
+    session.secret = secret || '';
+    session.token = token || '';
     await session.save();
     
     return NextResponse.json({ success: true });
