@@ -21,15 +21,39 @@ export const Wizard = () => {
     }
   }, []);
 
+  const [isManual, setIsManual] = useState(false);
+
+  const handleManualConnect = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch('/api/auth/manual', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(creds),
+      });
+      if (!res.ok) throw new Error('Credenciales inválidas');
+      
+      const catRes = await fetch('/api/categories');
+      if (!catRes.ok) throw new Error('No se pudieron obtener categorías');
+      const cats = await catRes.json();
+      setCategories(cats);
+      setStep('SELECTING_CATEGORIES');
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleOneClickConnect = () => {
     if (!creds.url) return setError('Ingresá la URL de tu tienda');
-    
     const baseUrl = window.location.origin.replace(/\/$/, '');
     const returnUrl = baseUrl;
     const callbackUrl = `${baseUrl}/api/auth/callback`;
     const cleanStoreUrl = creds.url.replace(/\/$/, '');
     const authUrl = `${cleanStoreUrl}/wc-auth/v1/authorize?app_name=PDF%20Woo&scope=read&user_id=1&return_url=${returnUrl}&callback_url=${callbackUrl}`;
-    
     window.location.href = authUrl;
   };
 
@@ -84,48 +108,72 @@ export const Wizard = () => {
 
       {step === 'CONNECTING' && (
         <div className="p-10 bg-white rounded-3xl shadow-2xl border border-gray-100">
-          <h2 className="text-3xl font-serif mb-6 text-gray-900">Conectar Tienda</h2>
+          <h2 className="text-3xl font-serif mb-6 text-gray-900">{isManual ? 'Conexión Manual' : 'Conectar Tienda'}</h2>
           <p className="text-gray-500 mb-8 text-sm">
-            Ingresá la dirección de tu WordPress para iniciar la conexión segura.
+            {isManual ? 'Ingresá tus llaves de API manualmente.' : 'Ingresá la dirección de tu WordPress para iniciar la conexión segura.'}
           </p>
           
-          <div className="space-y-6">
+          <div className="space-y-4">
             <div>
               <label className="block text-xs uppercase tracking-widest text-gray-400 mb-2 font-semibold">URL del Sitio</label>
               <input 
                 type="url" 
                 placeholder="https://mitienda.com"
-                required
                 className="w-full p-4 bg-gray-50 border-none rounded-xl focus:ring-2 focus:ring-black transition-all"
                 value={creds.url}
                 onChange={e => setCreds({...creds, url: e.target.value})}
               />
             </div>
+            {isManual && (
+              <>
+                <div>
+                  <label className="block text-xs uppercase tracking-widest text-gray-400 mb-2 font-semibold">Consumer Key</label>
+                  <input 
+                    type="text" 
+                    placeholder="ck_..."
+                    className="w-full p-4 bg-gray-50 border-none rounded-xl focus:ring-2 focus:ring-black transition-all"
+                    value={creds.key}
+                    onChange={e => setCreds({...creds, key: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs uppercase tracking-widest text-gray-400 mb-2 font-semibold">Consumer Secret</label>
+                  <input 
+                    type="password" 
+                    placeholder="cs_..."
+                    className="w-full p-4 bg-gray-50 border-none rounded-xl focus:ring-2 focus:ring-black transition-all"
+                    value={creds.secret}
+                    onChange={e => setCreds({...creds, secret: e.target.value})}
+                  />
+                </div>
+              </>
+            )}
           </div>
           
           {error && <p className="mt-6 text-red-500 text-sm font-medium bg-red-50 p-3 rounded-xl">⚠️ {error}</p>}
           
-          <div className="mt-10 flex gap-4">
+          <div className="mt-10 flex flex-col gap-3">
             <button 
-              onClick={() => setStep('IDLE')}
-              className="flex-1 py-4 text-gray-400 font-semibold hover:text-black transition-colors text-sm"
-            >
-              Cancelar
-            </button>
-            <button 
-              onClick={handleOneClickConnect}
+              onClick={isManual ? handleManualConnect : handleOneClickConnect}
               disabled={loading}
-              className="flex-[2] py-4 bg-black text-white rounded-xl font-semibold hover:bg-gray-800 disabled:bg-gray-300 transition-all shadow-lg"
+              className="w-full py-4 bg-black text-white rounded-xl font-semibold hover:bg-gray-800 disabled:bg-gray-300 transition-all shadow-lg"
             >
-              {loading ? 'Conectando...' : 'Vincular Tienda'}
+              {loading ? 'Conectando...' : isManual ? 'Conectar Manualmente' : 'Vincular Tienda'}
             </button>
-          </div>
-          
-          <div className="mt-8 p-4 bg-blue-50 rounded-2xl flex gap-3">
-            <span className="text-blue-500">ℹ️</span>
-            <p className="text-[10px] text-blue-700 leading-relaxed">
-              No necesitás crear llaves manuales. Te redirigiremos a tu WordPress para que autorices el acceso con un clic.
-            </p>
+            <div className="flex justify-between items-center px-1">
+              <button 
+                onClick={() => setStep('IDLE')}
+                className="text-gray-400 font-semibold hover:text-black transition-colors text-xs uppercase tracking-widest"
+              >
+                Cancelar
+              </button>
+              <button 
+                onClick={() => setIsManual(!isManual)}
+                className="text-black font-bold hover:underline text-xs"
+              >
+                {isManual ? 'Usar modo automático' : '¿Problemas? Usar llaves manuales'}
+              </button>
+            </div>
           </div>
         </div>
       )}
