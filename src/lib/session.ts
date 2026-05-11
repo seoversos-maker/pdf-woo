@@ -16,6 +16,7 @@ export const sessionOptions = {
   },
 };
 
-export async function getSession() {
-  return getIronSession<SessionData>(await cookies(), sessionOptions);
+// For Vercel Serverless Functions (Node.js)
+export async function getSession(req: any, res: any) {
+  return getIronSession<SessionData>(req, res, sessionOptions);
 }
