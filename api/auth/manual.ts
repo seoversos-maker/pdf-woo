@@ -1,5 +1,13 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
-import { getSession } from '../../src/lib/session';
+import { getIronSession } from 'iron-session';
+
+const sessionOptions = {
+  password: process.env.SESSION_PASSWORD || 'complex_password_at_least_32_characters_long',
+  cookieName: 'wc_session',
+  cookieOptions: {
+    secure: process.env.NODE_ENV === 'production',
+  },
+};
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
@@ -7,13 +15,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const { url, key, secret, token } = req.body;
+    // Asegurar que el body esté parseado
+    const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+    const { url, key, secret, token } = body || {};
 
     if (!url || (!token && (!key || !secret))) {
       return res.status(400).json({ error: 'Faltan datos' });
     }
 
-    const session = await getSession(req, res);
+    const session = await getIronSession(req, res, sessionOptions);
     session.url = url;
     session.key = key || '';
     session.secret = secret || '';
@@ -22,7 +32,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     
     return res.status(200).json({ success: true });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: 'Error al guardar sesión' });
+    console.error('Error en manual auth:', error);
+    return res.status(500).json({ error: 'Error al guardar sesión: ' + error.message });
   }
 }
