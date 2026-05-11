@@ -1,5 +1,4 @@
-import { getIronSession } from 'iron-session';
-import { cookies } from 'next/headers';
+import { getIronSession, IronSession } from 'iron-session';
 
 export interface SessionData {
   url: string;
@@ -16,7 +15,7 @@ export const sessionOptions = {
   },
 };
 
-// For Vercel Serverless Functions (Node.js)
-export async function getSession(req: any, res: any) {
+// Función universal para obtener la sesión pasando req y res
+export async function getSession(req: any, res: any): Promise<IronSession<SessionData>> {
   return getIronSession<SessionData>(req, res, sessionOptions);
 }
