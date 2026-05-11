@@ -24,9 +24,11 @@ export const Wizard = () => {
   const handleOneClickConnect = () => {
     if (!creds.url) return setError('Ingresá la URL de tu tienda');
     
-    const returnUrl = window.location.origin;
-    const callbackUrl = `${window.location.origin}/api/auth/callback`;
-    const authUrl = `${creds.url}/wc-auth/v1/authorize?app_name=PDF%20Woo&scope=read&user_id=1&return_url=${returnUrl}&callback_url=${callbackUrl}`;
+    const baseUrl = window.location.origin.replace(/\/$/, '');
+    const returnUrl = baseUrl;
+    const callbackUrl = `${baseUrl}/api/auth/callback`;
+    const cleanStoreUrl = creds.url.replace(/\/$/, '');
+    const authUrl = `${cleanStoreUrl}/wc-auth/v1/authorize?app_name=PDF%20Woo&scope=read&user_id=1&return_url=${returnUrl}&callback_url=${callbackUrl}`;
     
     window.location.href = authUrl;
   };
