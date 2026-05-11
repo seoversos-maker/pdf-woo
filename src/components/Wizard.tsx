@@ -63,11 +63,31 @@ export const Wizard = () => {
   // Check if session exists on mount or return
   useEffect(() => {
     async function checkSession() {
-      const res = await fetch('/api/categories');
-      if (res.ok) {
-        const cats = await res.json();
-        setCategories(cats);
-        setStep('SELECTING_CATEGORIES');
+      // Intentar cargar desde localStorage primero
+      const saved = localStorage.getItem('wc_creds');
+      if (saved) {
+        const savedCreds = JSON.parse(saved);
+        setCreds(savedCreds);
+        
+        const res = await fetch('/api/categories');
+        if (res.ok) {
+          const cats = await res.json();
+          setCategories(cats);
+          setStep('SELECTING_CATEGORIES');
+        } else if (res.status === 401) {
+          // Si el servidor perdió la sesión pero tenemos el token, re-autenticar silenciosamente
+          await fetch('/api/auth/manual', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(savedCreds),
+          });
+          const retryRes = await fetch('/api/categories');
+          if (retryRes.ok) {
+            const cats = await retryRes.json();
+            setCategories(cats);
+            setStep('SELECTING_CATEGORIES');
+          }
+        }
       }
     }
     checkSession();
@@ -76,13 +96,27 @@ export const Wizard = () => {
   const handleGenerate = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/products?category=${selectedCats.join(',')}`);
+      let res = await fetch(`/api/products?category=${selectedCats.join(',')}`);
+      
+      if (res.status === 401) {
+        // Re-autenticar si se perdió la sesión
+        const saved = localStorage.getItem('wc_creds');
+        if (saved) {
+          await fetch('/api/auth/manual', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: saved,
+          });
+          res = await fetch(`/api/products?category=${selectedCats.join(',')}`);
+        }
+      }
+
       if (!res.ok) throw new Error();
       const prods = await res.json();
       setProducts(prods);
       setStep('READY');
     } catch (err) {
-      setError('Error al traer productos.');
+      setError('Error al traer productos. Verificá tu conexión.');
     } finally {
       setLoading(false);
     }
