@@ -4,22 +4,23 @@ import { Asymmetric } from './layouts/Asymmetric';
 import { Minimal } from './layouts/Minimal';
 import { Technical } from './layouts/Technical';
 
-// Registering fonts for luxury aesthetic
-Font.register({
-  family: 'Bodoni Moda',
-  src: 'https://fonts.gstatic.com/s/bodonimoda/v25/a9m97jf8WAtS3Pa99as72r3-C_K8X_A.ttf',
-});
+// Temporarily disabled due to 404 TTF links. 
+// For luxury fonts, download the .ttf files and put them in the /public folder.
+// Font.register({
+//   family: 'Bodoni Moda',
+//   src: '/fonts/BodoniModa-Regular.ttf',
+// });
 
-Font.register({
-  family: 'Hanken Grotesk',
-  src: 'https://fonts.gstatic.com/s/hankengrotesk/v5/m8JXjfX8WAtS3Pa99as72r3-C_K8X_A.ttf',
-});
+// Font.register({
+//   family: 'Hanken Grotesk',
+//   src: '/fonts/HankenGrotesk-Regular.ttf',
+// });
 
 export const styles = StyleSheet.create({
   page: {
     padding: 40,
     backgroundColor: '#fbf9f9',
-    fontFamily: 'Hanken Grotesk',
+    fontFamily: 'Helvetica',
   },
   header: {
     flexDirection: 'row',
@@ -32,7 +33,7 @@ export const styles = StyleSheet.create({
   },
   logo: {
     fontSize: 48,
-    fontFamily: 'Bodoni Moda',
+    fontFamily: 'Times-Roman',
     textTransform: 'uppercase',
     color: '#0e0f0f',
   },
